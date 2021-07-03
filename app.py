@@ -87,5 +87,26 @@ def temp_monthly():
     temps = list(np.ravel(results))
     # jsonify our temps list, and then return it.
     return jsonify(temps=temps)
-    
 
+# report on the minimum, average, and maximum temperatures
+@app.route("/api/v1.0/temp/<start>")
+@app.route("/api/v1.0/temp/<start>/<end>")
+    
+# create a function called stats()
+# add parameters to our stats()function: a start parameter and an end parameter. For now, set them both to None
+# create a query to select the minimum, average, and maximum temperatures from our SQLite database
+
+def stats(start=None, end=None):
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+    # add an if-not statement to our code
+    if not end:
+        results = session.query(*sel).\
+            filter(Measurement.date >= start).all()
+        temps = list(np.ravel(results))
+        return jsonify(temps=temps)
+    # calculate the temperature minimum, average, and maximum with the start and end dates.
+    results = session.query(*sel).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+    temps = list(np.ravel(results))
+    return jsonify(temps)
